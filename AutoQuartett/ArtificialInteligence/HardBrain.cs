@@ -16,7 +16,7 @@ namespace AutoQuartett.ArtificialInteligence
         private double[] prevValues;
         private int cardCount = 0;
         /// <summary>
-        /// derive all properties through the parameter
+        /// derive all properties through the amount of recieved cards
         /// </summary>
         public void DeriveAllValues()
         {
