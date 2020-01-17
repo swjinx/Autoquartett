@@ -14,18 +14,18 @@ namespace AutoQuartett
 {
     public class GameController
     {
-        private readonly List<Card> Cards;
-        private readonly List<APlayer> Players;
+        private readonly List<Card> cards;
+        private readonly List<APlayer> players;
         private readonly Random rand;
         private Dictionary<string, int> history;
-        private APlayer Active;
+        private APlayer active;
         private readonly HardBrain brain;
         private int cardsInTheGame = 0;
 
         public GameController()
         {
-            Cards = new List<Card>();
-            Players = new List<APlayer>();
+            cards = new List<Card>();
+            players = new List<APlayer>();
             rand = new Random();
             brain = new HardBrain();
             SetHistory();
@@ -73,17 +73,17 @@ namespace AutoQuartett
         /// </summary>
         private void AddWinnerToHistory()
         {
-            if (history.ContainsKey(Active.Name))
-                history[Active.Name] += 1;
+            if (history.ContainsKey(active.Name))
+                history[active.Name] += 1;
             else
-                history.Add(Active.Name, 1);
+                history.Add(active.Name, 1);
         }
         /// <summary>
         /// Adds all players from the Players list to the history.
         /// </summary>
         private void AddAllPlayersToHistory()
         {
-            foreach(var player in Players)
+            foreach(var player in players)
             {
                 if (!history.ContainsKey(player.Name))
                     history.Add(player.Name, 0);
@@ -107,7 +107,7 @@ namespace AutoQuartett
                 AddWinnerToHistory();
                 WriteHistoryToFile();
                 ShowEndScreen();
-                Players.Clear();
+                players.Clear();
             }
         }
         /// <summary>
@@ -116,21 +116,21 @@ namespace AutoQuartett
         private void RemoveAllBeatenPlayers()
         {
             Console.Clear();
-            var defeated = Players.Where(x => x.Points == 0);
+            var defeated = players.Where(x => x.Points == 0);
             foreach(APlayer p in defeated)
             {
                 Console.WriteLine($"\"{p.Name}\" ist geschlagen und kann nicht weiter spielen!");
                 Thread.Sleep(1000);
             } 
-            Players.RemoveAll(x => x.Points == 0);
+            players.RemoveAll(x => x.Points == 0);
         }
         /// <summary>
         /// Sets the active player for the first turn.
         /// </summary>
         private void SetActivePlayerForFirstTurn()
         {
-            int fst = rand.Next(0, Players.Count);
-            Active = Players[fst];
+            int fst = rand.Next(0, players.Count);
+            active = players[fst];
         }
         /// <summary>
         /// Displays the endscreen on the console.
@@ -138,7 +138,7 @@ namespace AutoQuartett
         private void ShowEndScreen()
         {
             Console.Clear();
-            Console.WriteLine(Active.Name + " hat das Spiel gewonnen!");
+            Console.WriteLine(active.Name + " hat das Spiel gewonnen!");
             Console.WriteLine("Press any key to go back to the main menue.");
             Console.ReadKey();
         }
@@ -147,17 +147,17 @@ namespace AutoQuartett
         /// </summary>
         private void ShuffleAllCards()
         {
-            var cardArr = Cards.ToArray();
+            var cardArr = cards.ToArray();
             for (int i = 0; i < 30; i++)
             {
-                int rand1 = rand.Next(0, Cards.Count);
-                int rand2 = rand.Next(0, Cards.Count);
+                int rand1 = rand.Next(0, cards.Count);
+                int rand2 = rand.Next(0, cards.Count);
                 var tmp = cardArr[rand1];
                 cardArr[rand1] = cardArr[rand2];
                 cardArr[rand2] = tmp;
             }
-            Cards.Clear();
-            Cards.AddRange(cardArr);
+            cards.Clear();
+            cards.AddRange(cardArr);
         }
         /// <summary>
         /// Gets the data for the cards and pushes the card object to the end of the cardslist.
@@ -169,7 +169,7 @@ namespace AutoQuartett
             {
                 string[] data = lines[i].Split(';');
                 Card c = new Card(data[0], int.Parse(data[1]), int.Parse(data[2]), double.Parse(data[3]), int.Parse(data[4]), int.Parse(data[5]));
-                Cards.Add(c);
+                cards.Add(c);
                 brain.AddCard(c);
             }
             brain.DeriveAllValues();
@@ -179,11 +179,11 @@ namespace AutoQuartett
         /// </summary>
         private void SplitCardsToPlayers()
         {
-            int split = 32 / Players.Count;
-            cardsInTheGame = Players.Count * split;
-            for (int i = 0; i < Players.Count; i++)
+            int split = 32 / players.Count;
+            cardsInTheGame = players.Count * split;
+            for (int i = 0; i < players.Count; i++)
             {
-                Players[i].PushCardsToBottom(Cards.Skip(i * split).Take(split).ToList());
+                players[i].PushCardsToBottom(cards.Skip(i * split).Take(split).ToList());
             }
         }
         /// <summary>
@@ -201,7 +201,7 @@ namespace AutoQuartett
             switch (Console.ReadLine())
             {
                 case "1":
-                    Players.Add(new Human("Spieler 1"));
+                    players.Add(new Human("Spieler 1"));
                     ChooseNicknames();
                     ChooseDifficulty();
                     break;
@@ -222,8 +222,8 @@ namespace AutoQuartett
                     Environment.Exit(0);
                     break;
                 case "6":
-                    Players.Add(new Computer("KI 1", brain));
-                    Players.Add(new Computer("KI 2", brain));
+                    players.Add(new Computer("KI 1", brain));
+                    players.Add(new Computer("KI 2", brain));
                     break;
                 default:
                     Console.Clear();
@@ -236,7 +236,7 @@ namespace AutoQuartett
         /// </summary>
         private void ChooseNicknames()
         {
-            foreach(var player in Players)
+            foreach(var player in players)
             {
                 Console.Clear();
                 if (player is Human)
@@ -261,7 +261,7 @@ namespace AutoQuartett
             }
             for(int i = 0; i < amount; i++)
             {
-                Players.Add(new Human("Spieler " + (i+1)));
+                players.Add(new Human("Spieler " + (i+1)));
             }
         }
         /// <summary>
@@ -276,10 +276,10 @@ namespace AutoQuartett
             switch (Console.ReadLine())
             {
                 case "1":
-                    Players.Add(new Computer("KI", new LowBrain()));
+                    players.Add(new Computer("KI", new LowBrain()));
                     break;
                 case "2":
-                    Players.Add(new Computer("KI", brain));
+                    players.Add(new Computer("KI", brain));
                     break;
                 default:
                     ChooseDifficulty();
@@ -295,7 +295,7 @@ namespace AutoQuartett
             SwitchActivePlayerToEnd();
             var stats = GetStats();
             ShowStats(stats);
-            var playingCards = new List<Card>() { Active.GetTopCard() };
+            var playingCards = new List<Card>() { active.GetTopCard() };
             playingCards[0].Show();
             return PlayerAction(playingCards,stats);
         }
@@ -305,8 +305,8 @@ namespace AutoQuartett
         /// <returns>List with all cards for </returns>
         private List<Card> GetAllPlayingCards(List<Card> tmpCards, int choice)
         {
-            for (int i = 0; i < Players.Count-1; i++)
-                tmpCards.Add(Players[i].GetTopCard(choice));
+            for (int i = 0; i < players.Count-1; i++)
+                tmpCards.Add(players[i].GetTopCard(choice));
             return tmpCards;
         }
         /// <summary>
@@ -314,8 +314,8 @@ namespace AutoQuartett
         /// </summary>
         private void SwitchActivePlayerToEnd()
         {
-            Players.Remove(Active);
-            Players.Add(Active);
+            players.Remove(active);
+            players.Add(active);
         }
         /// <summary>
         /// Prints the stats -> the stack count of each player to the console.
@@ -327,14 +327,14 @@ namespace AutoQuartett
             Console.WriteLine(stats);
             Console.WriteLine();
             Console.WriteLine();
-            Console.WriteLine($"\"{Active.Name}\" ist am Zug!");
+            Console.WriteLine($"\"{active.Name}\" ist am Zug!");
             Console.WriteLine();
         }
 
         private string GetStats()
         {
             string s = "";
-            foreach (APlayer a in Players)
+            foreach (APlayer a in players)
                 s += $"{a.ShowString()} | \t";
             return s;
         }
@@ -345,7 +345,7 @@ namespace AutoQuartett
         /// <returns>true if the game is over</returns>
         private bool PlayerAction(List<Card> tmpCards, string stats)
         {
-            int choice = Active.ChooseValue();
+            int choice = active.ChooseValue();
             if(tmpCards.Count == 1)
             {
                 var fst = tmpCards[0];
@@ -380,7 +380,7 @@ namespace AutoQuartett
             if (winner.Item1)
             {
                 var end = PushCardsToWinner(winner.Item2, tmpCards);
-                Console.WriteLine($"\"{Active.Name}\" gewinnt die Runde!");
+                Console.WriteLine($"\"{active.Name}\" gewinnt die Runde!");
                 Thread.Sleep(1000);
                 return end;
             }
@@ -398,9 +398,9 @@ namespace AutoQuartett
         /// <returns>true if game is over</returns>
         private bool PushCardsToWinner(int player, List<Card> tmpPards)
         {
-            Active = Players[player];
-            Active.PushCardsToBottom(tmpPards);
-            if (Active.Points == cardsInTheGame)
+            active = players[player];
+            active.PushCardsToBottom(tmpPards);
+            if (active.Points == cardsInTheGame)
                 return false;
             return true;
         }
